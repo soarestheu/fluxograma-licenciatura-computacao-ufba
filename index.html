@@ -1,24 +1,331 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fluxograma - Licenciatura em Computação UFBA</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fluxograma – Licenciatura em Computação UFBA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f2f0eb;--card:#fff;--text:#1b2430;--muted:#677082;--border:#dedad2;--blue:#27487a;--green:#1c8a52}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,sans-serif}.wrap{max-width:1560px;margin:auto;padding:20px 16px}h1{font-size:clamp(28px,5vw,46px);margin:0;line-height:1.05}p{color:var(--muted)}.tools{position:sticky;top:0;background:var(--bg);padding:12px 0;z-index:2;display:flex;gap:8px;flex-wrap:wrap}input,button{font:inherit;border:1px solid var(--border);border-radius:10px;padding:8px 12px;background:var(--card);color:var(--text)}input{flex:1;min-width:220px}button{cursor:pointer}.board{display:grid;grid-template-columns:repeat(9,minmax(180px,1fr));gap:12px;overflow-x:auto;padding-bottom:24px}.col{background:#ffffff88;border-radius:14px;padding:8px}.col h2{font-size:15px;margin:2px 4px 10px}.card{width:100%;text-align:left;margin-bottom:8px;border-left:6px solid var(--accent);transition:.15s}.card:hover{transform:translateY(-1px)}.card b,.card small,.card em{display:block}.card b{font-size:13px}.card small{margin:3px 0}.card em{font-size:11px;color:var(--muted);font-style:normal}.done{background:#e3f4ea}.hidden{display:none}.legend{color:var(--muted);font-size:12px;margin:4px 0 16px}.summary{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin:14px 0}.progress{height:8px;background:var(--border);border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;background:var(--green);width:0}
-</style></head>
-<body><main class="wrap"><h1>Licenciatura em Computação</h1><p>Fluxograma UFBA, válido a partir de 2023.1. Clique numa disciplina para marcar como paga ou pendente.</p><div class="summary"><b id="count">0 disciplinas pagas</b><div class="progress"><i id="bar"></i></div></div><div class="tools"><input id="search" type="search" placeholder="Buscar por nome ou código"><button id="clear">Apagar progresso</button></div><div class="legend">Computação · Matemática · Educação · Estágio · Optativa</div><section id="board" class="board"></section></main>
+:root{--bg:#f2f0eb;--sf:#fff;--sf2:#f8f7f4;--tx:#1b2430;--mu:#677082;--bd:#dedad2;--ac:#27487a;--act:#fff;--ok:#1c8a52;--okb:#e3f4ea;--pr:#b7791f;--prb:#fdf1d8;
+--c:#e8806c;--m:#4fa66a;--e:#4a9ad6;--s:#d93a3a;--o:#f0a020;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161b;--sf:#1e2128;--sf2:#252932;--tx:#ecebe7;--mu:#9aa1ae;--bd:#343a46;--ac:#8fb4f0;--act:#10151d;--ok:#4cc27d;--okb:#17301f;--pr:#f0b94d;--prb:#33290f}}
+:root[data-theme="dark"]{--bg:#14161b;--sf:#1e2128;--sf2:#252932;--tx:#ecebe7;--mu:#9aa1ae;--bd:#343a46;--ac:#8fb4f0;--act:#10151d;--ok:#4cc27d;--okb:#17301f;--pr:#f0b94d;--prb:#33290f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 Figtree,system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque",Georgia,serif;margin:0;letter-spacing:-.01em}
+.wrap{max-width:1560px;margin:0 auto;padding:0 16px}
+.hero{padding:22px 0 10px;display:flex;gap:18px;justify-content:space-between;flex-wrap:wrap;align-items:flex-end}
+h1{font-size:clamp(26px,4.4vw,44px);font-weight:800;line-height:1.05;max-width:16ch}
+.sub{color:var(--mu);margin:8px 0 0;max-width:52ch}
+.save{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mu)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok)}.dot.err{background:var(--s)}
+.top{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin:14px 0}
+@media(max-width:820px){.top{grid-template-columns:1fr}}
+.box{background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:16px}
+.drop{border:2px dashed var(--bd);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:.15s;background:var(--sf2)}
+.drop:hover,.drop.on{border-color:var(--ac)}
+.drop b{display:block;font:700 17px "Bricolage Grotesque",serif}
+.drop span{color:var(--mu);font-size:13px}
+#log{margin-top:10px;font-size:13px;color:var(--mu);max-height:120px;overflow:auto}
+#log .g{color:var(--ok);font-weight:600}
+.prog{display:flex;gap:18px;align-items:center}
+.ring{flex:none;width:112px;height:112px;position:relative}
+.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 24px "Bricolage Grotesque",serif}
+.rows{flex:1;display:grid;gap:9px;font-size:13px}
+.rows div{display:grid;gap:3px}
+.rows span b{font-family:"Bricolage Grotesque",serif;font-size:16px}
+.mini{height:6px;background:var(--bd);border-radius:9px;overflow:hidden}.mini i{display:block;height:100%;background:var(--ac)}
+input[type=number]{width:68px}
+input[type=search],input[type=number]{font:inherit;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--sf);color:var(--tx);min-width:0}
+button{font:inherit;border:1px solid var(--bd);background:var(--sf);color:var(--tx);border-radius:10px;padding:7px 13px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button:focus-visible,.card:focus-visible,.drop:focus-visible,input:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.tools{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:8px;padding:10px 0;align-items:center}
+.tools input[type=search]{flex:1;min-width:180px;max-width:320px}
+.chip[aria-pressed=true]{background:var(--ac);color:var(--act);border-color:var(--ac)}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mu);margin:2px 0 10px}
+.lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.board{display:grid;grid-template-columns:repeat(9,minmax(172px,1fr));gap:12px;overflow-x:auto;padding:2px 0 24px;scroll-snap-type:x proximity}
+.col{scroll-snap-align:start;background:color-mix(in srgb,var(--sf) 55%,transparent);border-radius:14px;padding:8px}
+.col h2{font-size:15px;padding:2px 4px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.col h2 small{font:500 12px Figtree;color:var(--mu)}
+.card{display:block;width:100%;text-align:left;background:var(--sf);border:1px solid var(--bd);border-left:6px solid var(--k);border-radius:10px;padding:9px 10px;margin-bottom:8px;position:relative;transition:transform .12s,box-shadow .12s}
+.card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.card b{font:700 13px "Bricolage Grotesque",serif;color:var(--tx);display:flex;justify-content:space-between;gap:6px}
+.card small{display:block;font-size:12.5px;line-height:1.28;margin:3px 0 4px}
+.card em{font-style:normal;font-size:11px;color:var(--mu)}
+.k-c{--k:var(--c)}.k-m{--k:var(--m)}.k-e{--k:var(--e)}.k-s{--k:var(--s)}.k-o{--k:var(--o)}
+.card.done{background:var(--okb)}
+.card.done b::after{content:"✓ paga";color:var(--ok);font:700 11px Figtree}
+.card.prog{background:var(--prb)}
+.card.prog b::after{content:"cursando";color:var(--pr);font:700 11px Figtree}
+.card.free{box-shadow:0 0 0 2px var(--ac)}
+.card.rel{outline:2px dashed var(--ac);outline-offset:1px}
+.card.sel{box-shadow:0 0 0 3px var(--tx)}
+.card.dim{opacity:.2}
+.back{position:fixed;inset:0;background:rgba(10,14,20,.4);opacity:0;pointer-events:none;transition:.2s;z-index:20}
+.back.on{opacity:1;pointer-events:auto}
+.dr{position:fixed;z-index:21;top:0;right:0;bottom:0;width:min(400px,100%);background:var(--sf);border-left:1px solid var(--bd);padding:calc(18px + env(safe-area-inset-top,0px)) 18px calc(18px + env(safe-area-inset-bottom,0px));overflow:auto;transform:translateX(105%);transition:transform .22s;box-shadow:-10px 0 30px rgba(0,0,0,.2)}
+.dr.on{transform:none}
+@media(max-width:700px){.dr{top:auto;width:100%;max-height:78vh;border-left:0;border-top:1px solid var(--bd);border-radius:18px 18px 0 0;transform:translateY(105%)}}
+.x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;padding:0;font-size:20px;line-height:1}
+.dr h3{font-size:22px;padding-right:40px}
+.tag{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--sf2);border:1px solid var(--bd);margin:8px 6px 0 0}
+.dr h4{margin:18px 0 6px;font-size:13px;color:var(--mu);font-weight:600}
+.lk{display:block;width:100%;text-align:left;margin-bottom:5px;padding:7px 10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button[aria-pressed=true]{background:var(--ac);color:var(--act);border-color:var(--ac)}
+dialog{border:1px solid var(--bd);border-radius:16px;background:var(--sf);color:var(--tx);width:min(560px,92vw);padding:18px}
+dialog::backdrop{background:rgba(10,14,20,.45)}
+textarea{width:100%;height:150px;font:12px monospace;background:var(--sf2);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.gv{width:100%;height:auto;display:block;background:var(--sf2);border:1px solid var(--bd);border-radius:12px}
+.gv g[data-go]{cursor:pointer}.gv rect{stroke-width:1.5}.gv g[data-go]:hover rect{stroke:var(--ac)}.gv text{fill:var(--tx);font:600 12px Figtree,sans-serif;pointer-events:none}.gv .t2{font-weight:400;font-size:10px;fill:var(--mu)}.gv .cap{font-weight:500;font-size:10px;fill:var(--mu)}
+.fld{display:grid;grid-template-columns:90px 1fr;gap:8px;align-items:start;margin-top:6px;font-size:13px}
+.fld input,.fld textarea{font:inherit;padding:7px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--sf);color:var(--tx);width:100%}
+.fld textarea{height:84px;resize:vertical}
+#pv{width:100%;border-radius:10px;border:1px solid var(--bd)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero">
+  <div><h1>Licenciatura em Computação</h1><p class="sub">Fluxograma UFBA, válido a partir de 2023.1. Toque numa disciplina para ver detalhes, navegar pelos pré-requisitos e marcar o andamento.</p></div>
+  <div class="save"><span class="dot" id="dot"></span><span id="sv">Salvo neste navegador</span><button id="bk">Backup</button><button id="im">Imagem</button></div>
+</div>
+<div class="top">
+  <div class="box">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Enviar histórico em PDF">
+      <b>Envie seu histórico escolar em PDF</b>
+      <span>Arraste o arquivo ou clique para escolher. A leitura acontece no seu navegador e nada é enviado para a internet.</span>
+      <input type="file" id="file" accept="application/pdf" hidden>
+    </div>
+    <div id="log" aria-live="polite"></div>
+  </div>
+  <div class="box prog">
+    <div class="ring"><svg width="112" height="112" viewBox="0 0 112 112"><circle cx="56" cy="56" r="48" fill="none" stroke="var(--bd)" stroke-width="10"/><circle id="rg" cx="56" cy="56" r="48" fill="none" stroke="var(--ok)" stroke-width="10" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6"/></svg><b id="pc">0%</b></div>
+    <div class="rows">
+      <div><span><b id="sO">0</b> / 2.265 h obrigatórias</span><div class="mini"><i id="mO"></i></div></div>
+      <div><span><b id="sP">0</b> / 480 h optativas</span><div class="mini"><i id="mP"></i></div></div>
+      <div><span>Complementares <input type="number" id="comp" min="0" max="455" value="0" aria-label="Horas complementares"> / 455 h</span><div class="mini"><i id="mC"></i></div></div>
+      <div><span>CR (média ponderada das notas): <b id="cr">–</b></span></div>
+    </div>
+  </div>
+</div>
+<div class="tools">
+  <input type="search" id="q" placeholder="Buscar por nome ou código" aria-label="Buscar disciplina">
+  <button class="chip" data-f="free" aria-pressed="false">Posso cursar agora</button>
+  <button class="chip" data-f="pend" aria-pressed="false">Pendentes</button>
+  <button class="chip" data-f="done" aria-pressed="false">Pagas</button>
+</div>
+<div class="lg"><span><i style="background:var(--c)"></i>Computação</span><span><i style="background:var(--m)"></i>Matemática</span><span><i style="background:var(--e)"></i>Educação</span><span><i style="background:var(--s)"></i>Estágio</span><span><i style="background:var(--o)"></i>Optativa</span><span>Contorno azul: pré-requisitos cumpridos</span></div>
+<div class="board" id="board"></div>
+</div>
+<div class="back" id="back"></div>
+<aside class="dr" id="dr" aria-label="Detalhes da disciplina" aria-hidden="true"><button class="x" id="cl" aria-label="Fechar">×</button><div id="det"></div></aside>
+<dialog id="dlg2"><h3>Imagem do progresso</h3><p style="color:var(--mu);font-size:13px">Pressione e segure a imagem (celular) ou clique com o botão direito (computador) para salvar ou compartilhar.</p><img id="pv" alt="Resumo do progresso"><div class="row"><button id="d2" style="margin-left:auto">Fechar</button></div></dialog>
+<dialog id="dlg"><h3>Backup do progresso</h3>
+<p style="color:var(--mu);font-size:13px">Copie o texto abaixo para guardar seu progresso. Para restaurar em outro navegador ou aparelho, cole o texto e toque em Restaurar.</p>
+<textarea id="ta" aria-label="Dados do backup"></textarea>
+<div class="row"><button id="cp">Copiar</button><button id="rs">Restaurar</button><button id="clr">Apagar tudo</button><button id="dc" style="margin-left:auto">Fechar</button></div><div id="dm" style="font-size:13px;margin-top:8px;color:var(--mu)"></div></dialog>
 <script>
-const courses=[
-['EDCB80','Filosofia da Educação',60,1,'#4a9ad6'],['MATA37','Introdução à Lógica de Programação',60,1,'#e8806c'],['MATA39','Seminários de Introdução ao Curso',45,1,'#e8806c'],['MATA01','Geometria Analítica',60,1,'#4fa66a'],['MATA42','Matemática Discreta I',60,1,'#4fa66a'],
-['EDC287','Educação e Tecnologias Contemporâneas',60,2,'#4a9ad6'],['MATD04','Estruturas de Dados',60,2,'#e8806c','MATA37'],['MATC81','Sistemas Básicos de Computação',60,2,'#e8806c'],['MATC73','Introdução à Lógica Matemática',60,2,'#e8806c','MATA01'],['MATA68','Computador, Ética e Sociedade',45,2,'#e8806c'],
-['EDCA01','Fundamentos Psicológicos da Educação',60,3,'#4a9ad6'],['MATA55','Programação Orientada a Objetos',60,3,'#e8806c','MATD04'],['MAT236','Métodos Estatísticos',60,3,'#4fa66a'],['MATC94','Linguagens Formais e Teoria da Computação',60,3,'#e8806c'],['OPT001','Optativa',60,3,'#f0a020'],
-['EDCA11','Didática e Práxis Pedagógica I',60,4,'#4a9ad6'],['MATA62','Engenharia de Software I',60,4,'#e8806c'],['MATC82','Sistemas Web',60,4,'#e8806c','MATA55'],['MATA59','Rede de Computadores I',60,4,'#e8806c','MATC81'],['MATA41','Informática na Educação',60,4,'#e8806c'],['LETE46','Libras - Língua Brasileira de Sinais',30,4,'#4a9ad6'],
-['EDCA12','Didática e Práxis Pedagógica II',60,5,'#4a9ad6','EDCA11'],['MATD05','Banco de Dados e Aplicações',60,5,'#e8806c','MATD04'],['MATB19','Sistemas Multimídia',60,5,'#e8806c','MATA55'],['MATB21','Ambientes Interativos de Aprendizagem',60,5,'#e8806c'],['EDC286','Avaliação da Aprendizagem',60,5,'#4a9ad6'],
-['MATC68','Estágio Supervisionado I',90,6,'#d93a3a','EDCA12'],['MATC76','Prática de Ensino de Computação I',60,6,'#e8806c'],['MATC72','Interação Humano-Computador',60,6,'#e8806c'],['MATC78','Projeto de Software Educativo',60,6,'#e8806c'],['MATB22','Laboratório de Informática na Educação',45,6,'#e8806c'],
-['MATC69','Estágio Supervisionado II',90,7,'#d93a3a','MATC68'],['MATC77','Prática de Ensino de Educação II',60,7,'#e8806c','MATC76'],['MATC79','Projetos Interdisciplinares',60,7,'#e8806c'],['MATB20','Inteligência Artificial em Educação',60,7,'#e8806c'],['OPT002','Optativa',60,7,'#f0a020'],
-['MATC70','Estágio Supervisionado III',90,8,'#d93a3a','MATC69'],['OPT003','Optativa',60,8,'#f0a020'],['OPT004','Optativa',60,8,'#f0a020'],['OPT005','Optativa',60,8,'#f0a020'],
-['MATC71','Estágio Supervisionado IV',90,9,'#d93a3a','MATC70'],['OPT006','Optativa',60,9,'#f0a020'],['OPT007','Optativa',60,9,'#f0a020'],['OPT008','Optativa',60,9,'#f0a020']].map(x=>({code:x[0],name:x[1],h:x[2],sem:x[3],color:x[4],pre:x[5]}));
-let done=JSON.parse(localStorage.getItem('ufba-done')||'{}');const board=document.querySelector('#board');
-function render(){const q=document.querySelector('#search').value.toLowerCase();board.innerHTML='';for(let s=1;s<=9;s++){const col=document.createElement('div');col.className='col';col.innerHTML=`<h2>${s}º semestre</h2>`;courses.filter(c=>c.sem===s).forEach(c=>{const b=document.createElement('button');b.className='card '+(done[c.code]?'done':'')+(q&&!(c.code+' '+c.name).toLowerCase().includes(q)?' hidden':'');b.style.setProperty('--accent',c.color);b.innerHTML=`<b>${c.code}</b><small>${c.name}</small><em>${c.h} h${c.pre?' · pré-requisito: '+c.pre:''}${done[c.code]?' · ✓ paga':''}</em>`;b.onclick=()=>{done[c.code]=!done[c.code];localStorage.setItem('ufba-done',JSON.stringify(done));render()};col.appendChild(b)});board.appendChild(col)}const n=Object.values(done).filter(Boolean).length;document.querySelector('#count').textContent=`${n} de ${courses.length} disciplinas pagas`;document.querySelector('#bar').style.width=(n/courses.length*100)+'%'}
-document.querySelector('#search').oninput=render;document.querySelector('#clear').onclick=()=>{done={};localStorage.removeItem('ufba-done');render()};render();
-</script></body></html>
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+// [código, nome, carga, semestre, categoria, pré-requisitos (conforme setas)]
+const D=[
+["EDCB80","Filosofia da Educação",60,1,"e"],["MATA37","Introdução à Lógica de Programação",60,1,"c"],["MATA39","Seminários de Introdução ao Curso",45,1,"c"],["MATA01","Geometria Analítica",60,1,"m"],["MATA42","Matemática Discreta I",60,1,"m"],
+["EDC287","Educação e Tecnologias Contemporâneas",60,2,"e"],["MATD04","Estruturas de Dados",60,2,"c",["MATA37"]],["MATC81","Sistemas Básicos de Computação: Arquitetura e Software",60,2,"c"],["MATC73","Introdução à Lógica Matemática",60,2,"c",["MATA01"]],["MATA68","Computador, Ética e Sociedade",45,2,"c"],
+["EDCA01","Fundamentos Psicológicos da Educação",60,3,"e"],["MATA55","Programação Orientada a Objetos",60,3,"c",["MATD04"]],["MAT236","Métodos Estatísticos",60,3,"m"],["MATC94","Introdução às Linguagens Formais e Teoria da Computação",60,3,"c"],["OPT001","Optativa",60,3,"o"],
+["EDCA11","Didática e Práxis Pedagógica I",60,4,"e"],["MATA62","Engenharia de Software I",60,4,"c"],["MATC82","Sistemas Web",60,4,"c",["MATA55"]],["MATA59","Rede de Computadores I",60,4,"c",["MATC81"]],["MATA41","Informática na Educação",60,4,"c"],["LETE46","Libras – Língua Brasileira de Sinais",30,4,"e"],
+["EDCA12","Didática e Práxis Pedagógica II",60,5,"e",["EDCA11"]],["MATD05","Banco de Dados e Aplicações",60,5,"c",["MATD04"]],["MATB19","Sistemas Multimídia",60,5,"c",["MATA55"]],["MATB21","Ambientes Interativos de Aprendizagem",60,5,"c"],["EDC286","Avaliação da Aprendizagem",60,5,"e"],
+["MATC68","Estágio Supervisionado I",90,6,"s",["EDCA12"]],["MATC76","Prática de Ensino de Computação I",60,6,"c"],["MATC72","Interação Humano-Computador",60,6,"c"],["MATC78","Projeto de Software Educativo",60,6,"c"],["MATB22","Laboratório de Informática na Educação",45,6,"c"],
+["MATC69","Estágio Supervisionado II",90,7,"s",["MATC68"]],["MATC77","Prática de Ensino de Educação II",60,7,"c",["MATC76"]],["MATC79","Projetos Interdisciplinares: Concepção e Prática",60,7,"c"],["MATB20","Inteligência Artificial em Educação",60,7,"c"],["OPT002","Optativa",60,7,"o"],
+["MATC70","Estágio Supervisionado III",90,8,"s",["MATC69"]],["OPT003","Optativa",60,8,"o"],["OPT004","Optativa",60,8,"o"],["OPT005","Optativa",60,8,"o"],
+["MATC71","Estágio Supervisionado IV",90,9,"s",["MATC70"]],["OPT006","Optativa",60,9,"o"],["OPT007","Optativa",60,9,"o"],["OPT008","Optativa",60,9,"o"]
+].map(a=>({code:a[0],name:a[1],h:a[2],sem:a[3],cat:a[4],pre:a[5]||[]}));
+
+const M=Object.fromEntries(D.map(d=>[d.code,d]));
+const EQ={MATA45:"MATA37",MAT045:"MATA37",MATB59:"MAT236",MATAB59:"MAT236",MATA60:"MATD05"};
+const EQN={MATA37:"MATA45 – Processamento de Dados",MAT236:"MATB59 – Estatística Básica A",MATD05:"MATA60 – Banco de Dados"};
+const KEY="fluxo-ufba",CAT={c:"Computação",m:"Matemática",e:"Educação",s:"Estágio",o:"Optativa"};
+const $=id=>document.getElementById(id);
+let S={done:{},prog:{},comp:0,grade:{},note:{},opt:{}},sel=null,filt=null,qs="";
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));$("dot").className="dot";$("sv").textContent="Salvo neste navegador"}
+  catch(e){$("dot").className="dot err";$("sv").textContent="Sem armazenamento: use o Backup"}
+}
+const dependents=c=>D.filter(d=>d.pre.includes(c)).map(d=>d.code);
+const free=d=>!S.done[d.code]&&!S.prog[d.code]&&d.cat!=="o"&&d.pre.every(p=>S.done[p]);
+const stOf=c=>S.done[c]?"done":S.prog[c]?"prog":"none";
+const hrs=d=>S.opt[d.code]&&+S.opt[d.code].h?+S.opt[d.code].h:d.h;
+const nm=d=>S.opt[d.code]&&S.opt[d.code].name?S.opt[d.code].name:d.name;
+const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function crOf(){let a=0,b=0;for(const d of D){const g=parseFloat(S.grade[d.code]);if(S.done[d.code]&&!isNaN(g)){a+=g*hrs(d);b+=hrs(d)}}return b?a/b:null}
+function render(keep){
+  const q=qs.toLowerCase().trim();
+  const rel=sel?new Set([...M[sel].pre,...dependents(sel)]):null;
+  let h="";
+  for(let s=1;s<=9;s++){
+    const L=D.filter(x=>x.sem===s);
+    h+=`<div class="col"><h2>${s}º semestre<small>${L.reduce((a,x)=>a+x.h,0)} h</small></h2>`;
+    for(const d of L){
+      const st=stOf(d.code);
+      const hide=(q&&!(nm(d).toLowerCase().includes(q)||d.code.toLowerCase().includes(q)))||(filt==="free"&&!free(d))||(filt==="pend"&&st==="done")||(filt==="done"&&st!=="done");
+      const cl=["card","k-"+d.cat,st,free(d)?"free":"",sel===d.code?"sel":"",rel&&rel.has(d.code)?"rel":"",hide?"dim":""].join(" ");
+      h+=`<button class="${cl}" data-c="${d.code}"><b>${d.code}</b><small>${esc(nm(d))}</small><em>${hrs(d)} h${S.grade[d.code]?" · nota "+esc(S.grade[d.code]):""}${S.note[d.code]?" · anotação":""}</em></button>`;
+    }
+    h+="</div>";
+  }
+  $("board").innerHTML=h;
+  let o=0,p=0;
+  for(const d of D)if(S.done[d.code]){d.cat==="o"?p+=hrs(d):o+=hrs(d)}
+  const comp=Math.max(0,Math.min(455,+S.comp||0)),t=o+p+comp,pc=Math.min(100,t/32);
+  $("sO").textContent=o;$("sP").textContent=p;const cr=crOf();$("cr").textContent=cr===null?"–":cr.toFixed(2).replace(".",",");
+  $("mO").style.width=Math.min(100,o/22.65)+"%";$("mP").style.width=Math.min(100,p/4.8)+"%";$("mC").style.width=comp/4.55+"%";
+  $("pc").textContent=Math.round(pc)+"%";$("rg").style.strokeDashoffset=301.6*(1-pc/100);
+  if(sel&&!keep)detail();
+}
+function graph(d){
+  const P=d.pre,N=dependents(d.code),R=Math.max(P.length,N.length,1),H=R*46+22,W=370,cy=H/2+6;
+  const y=(i,n)=>(H+6)/2-(n*46)/2+i*46+6;
+  const node=(c,x,yy,cur)=>{const k=M[c];return `<g data-go="${c}"><title>${esc(k.name)}</title><rect x="${x}" y="${yy}" width="100" height="36" rx="9" fill="var(--${k.cat})" fill-opacity="${cur?.55:.22}" stroke="${cur?"var(--tx)":"var(--${k.cat})".replace("${k.cat}",k.cat)}"/><text x="${x+50}" y="${yy+16}" text-anchor="middle">${c}${S.done[c]?" ✓":""}</text><text class="t2" x="${x+50}" y="${yy+29}" text-anchor="middle">${esc(k.name.length>17?k.name.slice(0,16)+"…":k.name)}</text></g>`};
+  let s=`<svg class="gv" viewBox="0 0 ${W} ${H+10}" role="img" aria-label="Fluxo de pré-requisitos"><defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mu)"/></marker></defs><text class="cap" x="50" y="10" text-anchor="middle">exige</text><text class="cap" x="185" y="10" text-anchor="middle">esta</text><text class="cap" x="320" y="10" text-anchor="middle">libera</text>`;
+  P.forEach((c,i)=>{const yy=y(i,P.length);s+=`<path d="M100 ${yy+18} C118 ${yy+18} 118 ${cy} 135 ${cy}" fill="none" stroke="var(--mu)" stroke-width="1.6" marker-end="url(#ar)"/>`+node(c,0,yy)});
+  N.forEach((c,i)=>{const yy=y(i,N.length);s+=`<path d="M235 ${cy} C252 ${cy} 252 ${yy+18} 270 ${yy+18}" fill="none" stroke="var(--mu)" stroke-width="1.6" marker-end="url(#ar)"/>`+node(c,270,yy)});
+  if(!P.length)s+=`<text class="cap" x="50" y="${cy+4}" text-anchor="middle">nenhum</text>`;
+  if(!N.length)s+=`<text class="cap" x="320" y="${cy+4}" text-anchor="middle">nenhuma</text>`;
+  return s+node(d.code,135,cy-12,1)+"</svg>";
+}
+function detail(){
+  const d=M[sel],st=stOf(sel);
+  const lk=a=>a.length?a.map(c=>`<button class="lk" data-go="${c}"><b>${c}</b> · ${M[c].name}${S.done[c]?" ✓":""}</button>`).join(""):'<span style="color:var(--mu);font-size:14px">Nenhum indicado no fluxograma.</span>';
+  $("det").innerHTML=`<h3>${esc(nm(d))}</h3>
+  <span class="tag">${d.code}</span><span class="tag">${hrs(d)} h</span><span class="tag">${d.sem}º semestre</span><span class="tag">${CAT[d.cat]}</span>
+  ${EQN[d.code]?`<p style="font-size:13px;color:var(--mu)">Equivalente a ${EQN[d.code]}</p>`:""}
+  ${d.cat==="o"?`<h4>Dados da optativa</h4><div class="fld"><label for="on">Nome</label><input id="on" value="${esc(S.opt[d.code]?S.opt[d.code].name:"")}" placeholder="Nome da optativa"></div><div class="fld"><label for="oh">Carga (h)</label><input id="oh" type="number" min="0" value="${hrs(d)}"></div>`:""}
+  <h4>Situação</h4>
+  <div class="seg"><button data-s="done" aria-pressed="${st==="done"}">Paga</button><button data-s="prog" aria-pressed="${st==="prog"}">Cursando</button><button data-s="none" aria-pressed="${st==="none"}">Pendente</button></div>
+  <h4>Fluxo (toque numa caixa para navegar)</h4>${graph(d)}
+  <h4>Nota e anotações</h4>
+  <div class="fld"><label for="gr">Nota (0 a 10)</label><input id="gr" type="number" min="0" max="10" step="0.1" inputmode="decimal" value="${esc(S.grade[sel]||"")}"></div>
+  <div class="fld"><label for="nt">Anotação</label><textarea id="nt" placeholder="Professor, semestre, dicas…">${esc(S.note[sel]||"")}</textarea></div>
+  <h4>Pré-requisitos</h4>${lk(d.pre)}
+  <h4>Libera</h4>${lk(dependents(sel))}`;
+}
+function open(c){sel=c;$("dr").classList.add("on");$("back").classList.add("on");$("dr").setAttribute("aria-hidden","false");render()}
+function close(){sel=null;$("dr").classList.remove("on");$("back").classList.remove("on");$("dr").setAttribute("aria-hidden","true");render()}
+$("board").onclick=e=>{const b=e.target.closest(".card");if(b)open(b.dataset.c)};
+$("cl").onclick=close;$("back").onclick=close;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if($("dlg").open)$("dlg").close();else if(sel)close()}});
+$("dr").onclick=e=>{
+  const g=e.target.closest("[data-go]");if(g){sel=g.dataset.go;render();$("dr").scrollTop=0;return}
+  const b=e.target.closest("[data-s]");if(!b)return;
+  delete S.done[sel];delete S.prog[sel];
+  if(b.dataset.s==="done")S.done[sel]=1;if(b.dataset.s==="prog")S.prog[sel]=1;save();render()};
+$("dr").addEventListener("input",e=>{
+  if(e.target.id=="on"||e.target.id=="oh"){const o=S.opt[sel]||(S.opt[sel]={code:""});if(e.target.id=="on")o.name=e.target.value;else o.h=+e.target.value||0;save();render(true)}
+  if(e.target.id=="gr"){S.grade[sel]=e.target.value;save();render(true)}
+  if(e.target.id=="nt"){S.note[sel]=e.target.value;save();render(true)}
+});
+$("q").oninput=e=>{qs=e.target.value;render()};
+document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
+  const f=b.dataset.f;filt=filt===f?null:f;
+  document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.f===filt));render()});
+$("comp").value=S.comp||0;
+$("comp").oninput=e=>{S.comp=+e.target.value||0;save();render()};
+// Backup
+$("bk").onclick=()=>{$("ta").value=JSON.stringify(S);$("dm").textContent="";$("dlg").showModal()};
+$("dc").onclick=()=>$("dlg").close();
+$("cp").onclick=async()=>{$("ta").select();try{await navigator.clipboard.writeText($("ta").value);$("dm").textContent="Copiado."}catch(e){document.execCommand&&document.execCommand("copy");$("dm").textContent="Texto selecionado: use Copiar do seu aparelho."}};
+$("rs").onclick=()=>{try{const j=JSON.parse($("ta").value);if(!j.done)throw 0;S={done:j.done||{},prog:j.prog||{},comp:+j.comp||0,grade:j.grade||{},note:j.note||{},opt:j.opt||{}};$("comp").value=S.comp;save();render();$("dm").textContent="Progresso restaurado."}catch(e){$("dm").textContent="Texto inválido. Cole o backup completo."}};
+$("clr").onclick=()=>{if(confirm("Apagar todo o progresso?")){S={done:{},prog:{},comp:0,grade:{},note:{},opt:{}};$("comp").value=0;save();render();$("log").textContent="";$("dlg").close()}};
+// Imagem de progresso
+$("d2").onclick=()=>$("dlg2").close();
+$("im").onclick=()=>{
+  let o=0,p=0,n=0;for(const d of D)if(S.done[d.code]){n++;d.cat==="o"?p+=hrs(d):o+=hrs(d)}
+  const comp=Math.max(0,Math.min(455,+S.comp||0)),t=o+p+comp,pc=Math.min(100,t/32),cr=crOf();
+  const c=document.createElement("canvas");c.width=900;c.height=520;const x=c.getContext("2d");
+  x.fillStyle="#f2f0eb";x.fillRect(0,0,900,520);x.fillStyle="#27487a";x.fillRect(0,0,900,12);
+  x.fillStyle="#1b2430";x.font="800 38px Georgia,serif";x.fillText("Licenciatura em Computação · UFBA",40,76);
+  x.font="500 18px sans-serif";x.fillStyle="#677082";x.fillText("Meu progresso no fluxograma 2023.1",40,106);
+  x.lineWidth=18;x.strokeStyle="#dedad2";x.beginPath();x.arc(150,270,80,0,7);x.stroke();
+  x.strokeStyle="#1c8a52";x.lineCap="round";x.beginPath();x.arc(150,270,80,-Math.PI/2,-Math.PI/2+Math.PI*2*pc/100);x.stroke();
+  x.fillStyle="#1b2430";x.font="800 40px Georgia,serif";x.textAlign="center";x.fillText(Math.round(pc)+"%",150,284);x.textAlign="left";
+  const bar=(l,v,m,yy)=>{x.font="600 19px sans-serif";x.fillStyle="#1b2430";x.fillText(`${l}: ${v} / ${m} h`,300,yy);x.fillStyle="#dedad2";x.fillRect(300,yy+10,540,12);x.fillStyle="#27487a";x.fillRect(300,yy+10,540*Math.min(1,v/m),12)};
+  bar("Obrigatórias",o,2265,190);bar("Optativas",p,480,255);bar("Complementares",comp,455,320);
+  x.fillStyle="#1b2430";x.font="600 22px sans-serif";x.fillText(`${t} de 3.200 h  ·  ${n} disciplinas pagas  ·  CR ${cr===null?"–":cr.toFixed(2).replace(".",",")}`,40,440);
+  x.font="400 14px sans-serif";x.fillStyle="#677082";x.fillText("Gerado em "+new Date().toLocaleDateString("pt-BR"),40,480);
+  $("pv").src=c.toDataURL("image/png");$("dlg2").showModal();
+};
+// PDF
+const drop=$("drop"),file=$("file");
+drop.onclick=()=>file.click();
+drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();file.click()}};
+drop.ondragover=e=>{e.preventDefault();drop.classList.add("on")};
+drop.ondragleave=()=>drop.classList.remove("on");
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove("on");if(e.dataTransfer.files[0])readPdf(e.dataTransfer.files[0])};
+file.onchange=()=>{if(file.files[0])readPdf(file.files[0])};
+const ALI={GMAT0002:"MATC68",GMAT0003:"MATC69",GMAT0004:"MATC70",GMAT0005:"MATC71"};
+const tc=t=>{t=t.toLowerCase().replace(/(^|[\s:(\-])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\s(De|Da|Do|Das|Dos|E|Em|Para|Ao|A)\s/g,w=>w.toLowerCase());return t.charAt(0).toUpperCase()+t.slice(1)};
+async function readPdf(f){
+  const log=$("log");log.textContent="Lendo o PDF…";
+  try{
+    const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+    let txt="";
+    for(let i=1;i<=pdf.numPages;i++){const c=await (await pdf.getPage(i)).getTextContent();txt+=" "+c.items.map(x=>x.str).join(" ")}
+    txt=txt.replace(/\s+/g," ");
+    if(txt.length<50){log.textContent="Não encontrei texto no PDF (pode ser um scan). Use o histórico baixado direto do SIGAA.";return}
+    txt=txt.replace(/[\u00a0\u200b]/g," ");
+    const ST=/(?<![A-Za-zÀ-ú])(REPMF|REPF|REP|APR|TRANC|TRANS|MATR|CUMP|DISP|CANC|INCORP)(?![A-Za-zÀ-ú])/g;
+    const CODE=/([A-Z]{3,4}\d{2,4})A?(?![A-Za-z0-9])/g;
+    const NUM=/(?<![\w.,])(\d{1,3}(?:[.,]\d)?|-{2,3})(?![\w.,])/g;
+    const sts=[...txt.matchAll(ST)],rows=[];let prev=0,m;
+    sts.forEach(t=>{
+      const ps=prev,win=txt.slice(ps,t.index);prev=t.index+t[0].length;
+      const cs=[...win.matchAll(CODE)];if(!cs.length)return;
+      const c=cs[cs.length-1],mid=win.slice(c.index+c[0].length);
+      const nums=[...mid.matchAll(NUM)].map(x=>x[1]);
+      if(nums.length<2||!/^\d{2,3}$/.test(nums[nums.length-2]))return;
+      const ty=(win.slice(0,c.index).match(/(?<![A-Za-z])(EB|EP|OP|OB|LV|EC)\s*$/)||[])[1]||"";
+      let nm0=mid.split(/\d/)[0].trim();if(/[()]/.test(nm0))nm0="";
+      const raw=c[1];
+      rows.push({t:ty,raw,code:ALI[raw]||EQ[raw]||raw,ch:+nums[nums.length-2],nota:nums[nums.length-1].replace(",","."),st:t[1],name:nm0,idx:ps+c.index});
+    });
+    if(!rows.length){const k=Math.max(0,txt.search(/Cursados|Semestre\s+Componente/));log.innerHTML='Não reconheci o formato deste histórico ('+sts.length+' situações achadas). Marque manualmente.<details><summary>Ver o texto da tabela lido do PDF</summary><pre style="white-space:pre-wrap">'+esc(txt.slice(k,k+900))+'</pre></details>';return}
+    const eqH={},eqN={},eqDone=new Set();
+    const re2=/Cumpriu\s+([A-Z]{3,4}\d{2,4})\s+-\s+(.+?)\s+\((\d+)h\)\s+atrav[eé]s\s+de\s+([A-Z]{3,4}\d{2,4})A?\b/g;
+    while((m=re2.exec(txt))){eqDone.add(ALI[m[1]]||EQ[m[1]]||m[1]);eqH[m[4]]=+m[3];eqN[m[4]]=tc(m[2])}
+    const title=i=>{const w=txt.slice(Math.max(0,i-200),i),k=[...w.matchAll(/\d{4}\.\d\s+/g)].pop();if(!k)return"";const s=w.slice(k.index+k[0].length),p=s.search(/\b(?:Dra?\.|MSc\.|Esp\.|Me\.|Ma\.)|\b[A-Z][a-zà-ú]+\b/);return p>0?tc(s.slice(0,p).trim()):""};
+    const done=new Map(),prog=new Set(),opts=new Map();
+    for(const r of rows){
+      const ok=/^(APR|CUMP|DISP|INCORP)$/.test(r.st),k=M[r.code];
+      if(k&&k.cat!=="o"){if(ok)done.set(r.code,r.nota);else if(r.st==="MATR")prog.add(r.code)}
+      else if(!k&&ok&&/^(OP|EP|LV)$/.test(r.t))opts.set(r.code,{name:r.name?tc(r.name):(eqN[r.code]||title(r.idx)||"Optativa "+r.code),h:eqH[r.code]||r.ch,nota:r.nota});
+    }
+    eqDone.forEach(c=>{if(M[c]&&M[c].cat!=="o"&&!done.has(c))done.set(c,"")});
+    done.forEach((n,c)=>{S.done[c]=1;delete S.prog[c];if(/^\d/.test(n))S.grade[c]=n});
+    prog.forEach(c=>{if(!S.done[c])S.prog[c]=1});
+    const slots=D.filter(d=>d.cat==="o").map(d=>d.code),placed=[],extra=[];
+    for(const [code,o] of opts){
+      let k=slots.find(x=>S.opt[x]&&S.opt[x].code===code);
+      if(!k){k=slots.find(x=>!S.opt[x]);if(!k){extra.push(code);continue}S.opt[k]={code,name:o.name,h:o.h}}
+      S.done[k]=1;delete S.prog[k];if(/^\d/.test(o.nota))S.grade[k]=o.nota;placed.push(`${code} (${S.opt[k].h} h)`);
+    }
+    let comp=0;for(const mm of txt.matchAll(/ATIVIDADES\s+DE\s+[A-ZÇÃÕÉ]+\s+(\d+(?:\.\d+)?)/g))comp+=parseFloat(mm[1]);
+    if(comp){S.comp=Math.min(455,Math.round(comp));$("comp").value=S.comp}
+    const cr=(txt.match(/CR:\s*(\d+[.,]\d+)/)||[])[1];
+    save();render();
+    const L=a=>[...a].sort().join(", ")||"nenhuma";
+    log.innerHTML=`<div class="g">${done.size} obrigatórias marcadas como pagas; ${Object.keys(S.grade).filter(k=>S.grade[k]&&S.done[k]).length} notas lidas.</div><div>Cursando agora: ${L(prog)}</div><div>Optativas preenchidas (${placed.length}): ${placed.join(", ")||"nenhuma"}${extra.length?`. Sem vaga nos 8 espaços: ${extra.join(", ")}`:""}</div><div>Atividades complementares: ${comp?comp+" h":"não encontradas"}${cr?` · CR oficial do histórico: ${cr}`:""}</div><div>Dica: abra cada optativa para ajustar nome e carga horária. O CR da página usa só as disciplinas pagas, por isso difere do oficial.</div>`;
+  }catch(err){log.textContent="Não consegui ler esse PDF. Tente outro arquivo ou marque manualmente."}
+}
+
+render();save();
+</script>
+</body>
+</html>
